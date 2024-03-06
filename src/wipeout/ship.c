@@ -506,6 +506,7 @@ void ship_update(ship_t *self) {
 		track_collect_pickups(face)
 	) {
 		if (self->pilot == g.pilot) {
+                        init_shake(&g.camera, 3, 10);
 			sfx_play(SFX_POWERUP);
 			if (flags_is(self->flags, SHIP_SHIELDED)) {
 				self->weapon_type = weapon_get_random_type(WEAPON_CLASS_PROJECTILE);

@@ -21,8 +21,10 @@ void camera_init(camera_t *camera, section_t *section) {
 	camera->position = camera->section->center;
 	camera->velocity = vec3(0, 0, 0);
 	camera->angle = vec3(0, 0, 0);
+        camera->swiv = vec3(0, 0, 0);
 	camera->angular_velocity = vec3(0, 0, 0);
 	camera->has_initial_section = false;
+        camera->shake_start = 0;
 }
 
 vec3_t camera_forward(camera_t *camera) {
@@ -33,7 +35,26 @@ vec3_t camera_forward(camera_t *camera) {
 	return vec3(-(sy * cx), -sx, (cy * cx));
 }
 
+void camera_update_swivel(camera_t *camera) {
+        if (!camera->shake_start) return;
+        float time = system_time();
+        //float rand = ((float) rand_int(-1000, 1000))/1000;
+        //float sinus = sin(fmod(t, .2)/.5);
+        double s = ((time - camera->shake_start)  * camera->shake_frequency)/100;
+        int s0 = (int) s + 1;
+        int s1 = s0 + 1;
+        float decay = time >= camera->shake_start+camera->shake_duration ?
+                0 : (camera->shake_duration - time)*5 / camera->shake_duration;
+        if (decay <= 0) {camera->shake_start = 0; puts("swivel end");}
+
+        camera->swiv = vec3((camera->samples[s0] + (s-s0) * camera->samples[s1] - camera->samples[s0])*decay, (camera->samples[s0] + (s-s0) * camera->samples[s1] - camera->samples[s0])*decay, 0);
+
+        printf("s: %f, s0: %d, s1: %d, start: %f, decay; %f\n", s, s0, s1, camera->shake_start, decay);
+        printf("%f, %f, %f\n", camera->swiv.x, camera->swiv.y, camera->swiv.z);
+}
+
 void camera_update(camera_t *camera, ship_t *ship, droid_t *droid) {
+        camera_update_swivel(camera);
 	camera->last_position = camera->position;
 	(camera->update_func)(camera, ship, droid);
 	camera->real_velocity = vec3_mulf(vec3_sub(camera->position, camera->last_position), 1.0/system_tick());
@@ -56,13 +77,29 @@ void camera_update_race_external(camera_t *camera, ship_t *ship, droid_t *droid)
 	pos = vec3_add(pos, camera->velocity);
 
 	camera->position = pos;
-	camera->angle = vec3(ship->angle.x, ship->angle.y, 0);
+	camera->angle = vec3(ship->angle.x + camera->swiv.x, ship->angle.y + camera->swiv.y, 0);
+}
+
+void init_shake(camera_t *camera, int duration, int frequency) {
+        double t = system_time();
+
+        camera->shake_start = t;
+        camera->shake_duration = t + duration;
+        camera->sample_count = (duration) * frequency;
+        camera->shake_frequency = frequency;
+
+        if (camera->sample_count > sizeof(camera->samples)/sizeof(double))
+                return;
+        for (int i = 0; i < camera->sample_count; i++) {
+                camera->samples[i] = ((double)rand() / RAND_MAX) * 2 - 1;
+        }
+        puts("shaking\n");
 }
 
 void camera_update_race_internal(camera_t *camera, ship_t *ship, droid_t *droid) {
 	camera->section = ship->section;
 	camera->position = ship_cockpit(ship);
-	camera->angle = vec3(ship->angle.x, ship->angle.y, ship->angle.z * save.internal_roll);
+	camera->angle = vec3(ship->angle.x + camera->swiv.x, ship->angle.y + camera->swiv.y, ship->angle.z * save.internal_roll + camera->swiv.z);
 }
 
 void camera_update_race_intro(camera_t *camera, ship_t *ship, droid_t *droid) {
