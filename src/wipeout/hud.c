@@ -189,40 +189,40 @@ static void hud_draw_target_icon(vec3_t position) {
 void hud_draw(ship_t *ship) {
 	// Current lap time
 	if (ship->lap >= 0) {
-		ui_draw_time(ship->lap_time, ui_scaled_pos(UI_POS_BOTTOM | UI_POS_LEFT, vec2i(16, -30)), UI_SIZE_16, UI_COLOR_DEFAULT);
+		ui_draw_time(ship->lap_time, ui_scaled_pos(UI_POS_BOTTOM | UI_POS_LEFT, vec2i(16 + g.camera.swiv.x * 10, -30 + g.camera.swiv.y)), UI_SIZE_16, UI_COLOR_DEFAULT);
 	
 		for (int i = 0; i < ship->lap && i < NUM_LAPS-1; i++) {
-			ui_draw_time(g.lap_times[ship->pilot][i], ui_scaled_pos(UI_POS_BOTTOM | UI_POS_LEFT, vec2i(16, -45 - (10 * i))), UI_SIZE_8, UI_COLOR_ACCENT);
+			ui_draw_time(g.lap_times[ship->pilot][i], ui_scaled_pos(UI_POS_BOTTOM | UI_POS_LEFT, vec2i(16 + g.camera.swiv.x * 10, -45 - (10 * i) + g.camera.swiv.y)), UI_SIZE_8, UI_COLOR_ACCENT);
 		}
 	}
 
 	// Current Lap
 	int display_lap = max(0, ship->lap + 1);
-	ui_draw_text("LAP", ui_scaled(vec2i(15, 8)), UI_SIZE_8, UI_COLOR_ACCENT); 
-	ui_draw_number(display_lap, ui_scaled(vec2i(10, 19)), UI_SIZE_16, UI_COLOR_DEFAULT); 
+	ui_draw_text("LAP", ui_scaled(vec2i(15 + g.camera.swiv.x * 10, 8 + g.camera.swiv.y)), UI_SIZE_8, UI_COLOR_ACCENT); 
+	ui_draw_number(display_lap, ui_scaled(vec2i(10 + g.camera.swiv.x * 10, 19 + g.camera.swiv.y)), UI_SIZE_16, UI_COLOR_DEFAULT); 
 	int width = ui_char_width('0' + display_lap, UI_SIZE_16);
-	ui_draw_text("OF", ui_scaled(vec2i((10 + width), 27)), UI_SIZE_8, UI_COLOR_ACCENT);
-	ui_draw_number(NUM_LAPS, ui_scaled(vec2i((32 + width), 19)), UI_SIZE_16, UI_COLOR_DEFAULT);
+	ui_draw_text("OF", ui_scaled(vec2i((10 + width) + g.camera.swiv.x * 10, 27 + g.camera.swiv.y)), UI_SIZE_8, UI_COLOR_ACCENT);
+	ui_draw_number(NUM_LAPS, ui_scaled(vec2i((32 + width) + g.camera.swiv.x * 10, 19 + g.camera.swiv.y)), UI_SIZE_16, UI_COLOR_DEFAULT);
 
 	// Race Position
 	if (g.race_type != RACE_TYPE_TIME_TRIAL) {
-		ui_draw_text("POSITION", ui_scaled_pos(UI_POS_TOP | UI_POS_RIGHT, vec2i(-90, 8)), UI_SIZE_8, UI_COLOR_ACCENT);
-		ui_draw_number(ship->position_rank, ui_scaled_pos(UI_POS_TOP | UI_POS_RIGHT, vec2i(-60, 19)), UI_SIZE_16, UI_COLOR_DEFAULT);
+		ui_draw_text("POSITION", ui_scaled_pos(UI_POS_TOP | UI_POS_RIGHT, vec2i(-90 + g.camera.swiv.x * 10, 8 + g.camera.swiv.y)), UI_SIZE_8, UI_COLOR_ACCENT);
+		ui_draw_number(ship->position_rank, ui_scaled_pos(UI_POS_TOP | UI_POS_RIGHT, vec2i(-60 + g.camera.swiv.x * 10, 19 + g.camera.swiv.y)), UI_SIZE_16, UI_COLOR_DEFAULT);
 	}
 
 	// Framerate
 	if (save.show_fps) {
-		ui_draw_text("FPS", ui_scaled(vec2i(16, 78)), UI_SIZE_8, UI_COLOR_ACCENT);
-		ui_draw_number((int)(g.frame_rate), ui_scaled(vec2i(16, 90)), UI_SIZE_8, UI_COLOR_DEFAULT);
+		ui_draw_text("FPS", ui_scaled(vec2i(16 + g.camera.swiv.x * 10, 78 + g.camera.swiv.y)), UI_SIZE_8, UI_COLOR_ACCENT);
+		ui_draw_number((int)(g.frame_rate), ui_scaled(vec2i(16 + g.camera.swiv.x * 10, 90 + g.camera.swiv.y)), UI_SIZE_8, UI_COLOR_DEFAULT);
 	}
 
 	// Lap Record
-	ui_draw_text("LAP RECORD", ui_scaled(vec2i(15, 43)), UI_SIZE_8, UI_COLOR_ACCENT);
+	ui_draw_text("LAP RECORD", ui_scaled(vec2i(15 + g.camera.swiv.x * 10, 43 + g.camera.swiv.y)), UI_SIZE_8, UI_COLOR_ACCENT);
 	ui_draw_time(save.highscores[g.race_class][g.circut][g.highscore_tab].lap_record, ui_scaled(vec2i(15, 55)), UI_SIZE_8, UI_COLOR_DEFAULT);
 
 	// Wrong way
 	if (flags_not(ship->flags, SHIP_DIRECTION_FORWARD)) {
-		ui_draw_text_centered("WRONG WAY", ui_scaled_pos(UI_POS_MIDDLE | UI_POS_CENTER, vec2i(-20, 0)), UI_SIZE_16, UI_COLOR_ACCENT);
+		ui_draw_text_centered("WRONG WAY", ui_scaled_pos(UI_POS_MIDDLE | UI_POS_CENTER, vec2i(-20 + g.camera.swiv.x * 10, 0 + g.camera.swiv.y)), UI_SIZE_16, UI_COLOR_ACCENT);
 	}
 
 	// Speedo
@@ -233,8 +233,8 @@ void hud_draw(ship_t *ship) {
 
 	// Weapon icon
 	if (ship->weapon_type != WEAPON_TYPE_NONE) {
-		vec2i_t pos = ui_scaled_pos(UI_POS_TOP | UI_POS_CENTER, vec2i(-16, 20));
-		vec2i_t size = ui_scaled(vec2i(32, 32));
+		vec2i_t pos = ui_scaled_pos(UI_POS_TOP | UI_POS_CENTER, vec2i(-16 + g.camera.swiv.x * 10, 20 + g.camera.swiv.y));
+		vec2i_t size = ui_scaled(vec2i(32 + g.camera.swiv.x * 10, 32 + g.camera.swiv.y));
 		uint16_t icon = texture_from_list(weapon_icon_textures, ship->weapon_type-1);
 		render_push_2d(pos, size, rgba(128,128,128,255), icon);
 	}
@@ -242,7 +242,7 @@ void hud_draw(ship_t *ship) {
 	// Lives
 	if (g.race_type == RACE_TYPE_CHAMPIONSHIP) {
 		for (int i = 0; i < g.lives; i++) {
-			ui_draw_icon(UI_ICON_STAR, ui_scaled_pos(UI_POS_BOTTOM | UI_POS_RIGHT, vec2i(-26 - 13 * i, -50)), UI_COLOR_DEFAULT);
+			ui_draw_icon(UI_ICON_STAR, ui_scaled_pos(UI_POS_BOTTOM | UI_POS_RIGHT, vec2i(-26 - 13 * i + g.camera.swiv.x * 10, g.camera.swiv.y - 50)), UI_COLOR_DEFAULT);
 		}
 	}
 

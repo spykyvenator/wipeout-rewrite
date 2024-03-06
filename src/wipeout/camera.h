@@ -16,7 +16,7 @@ typedef struct camera_t {
         int sample_count;
 	bool has_initial_section;
 	float update_timer, shake_frequency;
-        double shake_start, shake_duration, samples[500];
+        double shake_start, shake_duration, samplesx[500], samplesy[500];
 	void (*update_func)(struct camera_t *, ship_t *, droid_t *);
 } camera_t;
 

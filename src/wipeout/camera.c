@@ -40,14 +40,14 @@ void camera_update_swivel(camera_t *camera) {
         float time = system_time();
         //float rand = ((float) rand_int(-1000, 1000))/1000;
         //float sinus = sin(fmod(t, .2)/.5);
-        double s = ((time - camera->shake_start)  * camera->shake_frequency)/100;
+        double s = ((time - camera->shake_start)  * camera->shake_frequency);
         int s0 = (int) s + 1;
         int s1 = s0 + 1;
         float decay = time >= camera->shake_start+camera->shake_duration ?
                 0 : (camera->shake_duration - time)*5 / camera->shake_duration;
         if (decay <= 0) {camera->shake_start = 0; puts("swivel end");}
 
-        camera->swiv = vec3((camera->samples[s0] + (s-s0) * camera->samples[s1] - camera->samples[s0])*decay, (camera->samples[s0] + (s-s0) * camera->samples[s1] - camera->samples[s0])*decay, 0);
+        camera->swiv = vec3((camera->samplesx[s0] + (s-s0) * camera->samplesx[s1] - camera->samplesx[s0])*(decay/2), (camera->samplesy[s0] + (s-s0) * camera->samplesy[s1] - camera->samplesy[s0])*(decay/2), 0);
 
         printf("s: %f, s0: %d, s1: %d, start: %f, decay; %f\n", s, s0, s1, camera->shake_start, decay);
         printf("%f, %f, %f\n", camera->swiv.x, camera->swiv.y, camera->swiv.z);
@@ -88,10 +88,11 @@ void init_shake(camera_t *camera, int duration, int frequency) {
         camera->sample_count = (duration) * frequency;
         camera->shake_frequency = frequency;
 
-        if (camera->sample_count > sizeof(camera->samples)/sizeof(double))
+        if (camera->sample_count > sizeof(camera->samplesx)/sizeof(double))
                 return;
         for (int i = 0; i < camera->sample_count; i++) {
-                camera->samples[i] = ((double)rand() / RAND_MAX) * 2 - 1;
+                camera->samplesx[i] = ((double)rand() / RAND_MAX) * 2 - 1;
+                camera->samplesy[i] = ((double)rand() / RAND_MAX) * 2 - 1;
         }
         puts("shaking\n");
 }
