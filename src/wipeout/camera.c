@@ -47,7 +47,7 @@ void camera_update_swivel(camera_t *camera) {
                 0 : (camera->shake_duration - time)*5 / camera->shake_duration;
         if (decay <= 0) {camera->shake_start = 0; puts("swivel end");}
 
-        camera->swiv = vec3((camera->samplesx[s0] + (s-s0) * camera->samplesx[s1] - camera->samplesx[s0])*(decay/2), (camera->samplesy[s0] + (s-s0) * camera->samplesy[s1] - camera->samplesy[s0])*(decay/2), 0);
+        camera->swiv = vec3((camera->samplesx[s0] + (s-s0) * camera->samplesx[s1] - camera->samplesx[s0])*(decay/20), (camera->samplesy[s0] + (s-s0) * camera->samplesy[s1] - camera->samplesy[s0])*(decay/20), 0);
 
         printf("s: %f, s0: %d, s1: %d, start: %f, decay; %f\n", s, s0, s1, camera->shake_start, decay);
         printf("%f, %f, %f\n", camera->swiv.x, camera->swiv.y, camera->swiv.z);
